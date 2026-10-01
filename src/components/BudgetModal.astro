@@ -1,0 +1,126 @@
+---
+// src/components/BudgetModal.astro
+---
+
+<div 
+  id="budget-modal" 
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300"
+>
+  <div class="relative w-full max-w-xl bg-[#11161f] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden transform scale-95 transition-all duration-300">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg">
+          💰
+        </span>
+        <div>
+          <h3 class="text-lg font-bold text-white leading-tight">Presupuesto Detallado</h3>
+          <p class="text-xs text-slate-400">4 amigos · Coche desde Valencia · Camping Río Ara</p>
+        </div>
+      </div>
+      <button 
+        id="btn-close-budget-modal" 
+        class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Summary Numbers -->
+    <div class="grid grid-cols-2 gap-3 my-5">
+      <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25">
+        <span class="text-[11px] uppercase tracking-wider font-extrabold text-emerald-400">Por Persona</span>
+        <div class="text-3xl font-black text-white mt-1">
+          58,75 <span class="text-base text-emerald-400 font-bold">€</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Límite fijado: 150 € (Margen de 91,25 €)</p>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+        <span class="text-[11px] uppercase tracking-wider font-extrabold text-slate-400">Total Grupo (4 pers)</span>
+        <div class="text-3xl font-black text-white mt-1">
+          235,00 <span class="text-base text-slate-400 font-bold">€</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Gasolina + Camping 4 noches + Bus</p>
+      </div>
+    </div>
+
+    <!-- Breakdown Table -->
+    <div class="space-y-3 text-xs">
+      <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-base">⛽</span>
+          <div>
+            <div class="font-bold text-white">Gasolina Coche Valencia ⇄ Pirineos</div>
+            <div class="text-[11px] text-slate-400">~1.100 km total (viaje + Bujaruelo + Añisclo + Broto)</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-white">99,00 €</div>
+          <div class="text-[11px] text-emerald-400 font-semibold">24,75 € / pers</div>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-base">⛺</span>
+          <div>
+            <div class="font-bold text-white">Camping Río Ara (Torla) · 4 Noches</div>
+            <div class="text-[11px] text-slate-400">Parcela + coche + 4 personas (~25,50 €/noche)</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-white">102,00 €</div>
+          <div class="text-[11px] text-emerald-400 font-semibold">25,50 € / pers</div>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-base">🚌</span>
+          <div>
+            <div class="font-bold text-white">Autobús Lanzadera Torla ⇄ Pradera Ordesa</div>
+            <div class="text-[11px] text-slate-400">Obligatorio en octubre para proteger el Parque</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-white">34,00 €</div>
+          <div class="text-[11px] text-emerald-400 font-semibold">8,50 € / pers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings Tip -->
+    <div class="mt-5 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2.5">
+      <span class="text-base shrink-0">💡</span>
+      <p class="leading-relaxed">
+        <strong>Ahorro en comida:</strong> Comprando víveres en el supermercado de Torla para sándwiches de mediodía y pasta/arroz de hornillo para las cenas, el gasto en comida rondará unos <strong>25-30 € por persona</strong> para los 5 días.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('budget-modal');
+    const closeBtn = document.getElementById('btn-close-budget-modal');
+
+    const openModal = () => {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.remove('scale-95');
+      modal.querySelector('.transform').classList.add('scale-100');
+    };
+
+    const closeModal = () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.add('scale-95');
+      modal.querySelector('.transform').classList.remove('scale-100');
+    };
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener('open-budget-modal', openModal);
+  });
+</script>

@@ -1,0 +1,20 @@
+{
+  "name": "pirineos-trip",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0 --port 4321",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.4.0",
+    "@astrojs/tailwind": "^6.0.0",
+    "tailwindcss": "^3.4.17",
+    "leaflet": "^1.9.4",
+    "lucide": "^0.475.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.16"
+  }
+}

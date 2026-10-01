@@ -1,0 +1,90 @@
+---
+// DynamicIsland.astro
+import { TRIP_META } from '../data/tripData';
+---
+
+<header class="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+  <div class="pointer-events-auto bg-surface/85 backdrop-blur-2xl border border-white/15 shadow-2xl rounded-full px-4 py-2 sm:px-6 sm:py-2.5 flex items-center justify-between gap-4 max-w-3xl w-full transition-all duration-300 hover:border-white/25">
+    
+    <!-- Left badge -->
+    <a href="#hero" class="flex items-center gap-2 group">
+      <span class="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-glow"></span>
+      <div class="flex flex-col">
+        <span class="text-xs sm:text-sm font-bold tracking-tight text-white group-hover:text-accent transition-colors">
+          Pirineos '26
+        </span>
+        <span class="text-[10px] text-slate-400 -mt-0.5 hidden sm:inline">Ordesa & Cazadores</span>
+      </div>
+    </a>
+
+    <!-- Center Navigation Links -->
+    <nav class="hidden md:flex items-center gap-5 text-xs font-medium text-slate-300">
+      <a href="#itinerario" class="hover:text-white transition-colors">Itinerario</a>
+      <a href="#mapa" class="hover:text-white transition-colors">Mapa</a>
+      <a href="#presupuesto" class="hover:text-white transition-colors">Presupuesto</a>
+      <a href="#material" class="hover:text-white transition-colors">Equipamiento</a>
+    </nav>
+
+    <!-- Right: Cost & WhatsApp Action -->
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <!-- Cost Chip -->
+      <div class="flex flex-col items-end">
+        <span class="text-xs sm:text-sm font-extrabold text-emerald-400">
+          ~{TRIP_META.estimatedCostPerPerson.toFixed(2)} €
+        </span>
+        <span class="text-[9px] uppercase tracking-wider text-slate-400 -mt-0.5">por persona</span>
+      </div>
+
+      <!-- WhatsApp Share Button -->
+      <button 
+        id="share-whatsapp-btn"
+        type="button" 
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-obsidian text-xs font-semibold shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 active:scale-95"
+      >
+        <span>📲</span>
+        <span class="hidden sm:inline">Compartir al Grupo</span>
+        <span class="sm:hidden">Grupo</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Toast notification for copied text -->
+<div id="copy-toast" class="fixed bottom-6 right-6 z-50 bg-emerald-500 text-obsidian px-4 py-2.5 rounded-2xl font-bold text-xs shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-3">
+  <span>✅</span>
+  <span>¡Resumen copiado para WhatsApp! Pégalo en el chat del grupo</span>
+</div>
+
+<script is:inline define:vars={{ TRIP_META }}>
+  document.getElementById('share-whatsapp-btn')?.addEventListener('click', () => {
+    const text = `🏔️ *PLAN VIAJE ORDESA & PIRINEOS 2026* ⛺
+📅 *Fechas*: ${TRIP_META.dates} (Puente del Pilar)
+👥 *Grupo*: 4 personas en coche desde Valencia
+📍 *Base Camp*: Torla-Ordesa (Camping Río Ara)
+💰 *Presupuesto total estimado*: ~${TRIP_META.estimatedCostPerPerson} € / persona (Límite: ${TRIP_META.maxBudgetPerPerson} €)
+
+🗺️ *ITINERARIO*:
+• *Jueves 8*: Salida 06:00 AM Valencia ➔ Senda de los Cazadores + Faja de Pelay + Cola de Caballo (20 km • +750m)
+• *Viernes 9*: Valle de Bujaruelo & Circo Glaciar de Otal (14 km • +450m)
+• *Sábado 10*: Cañón de Añisclo & Desfiladero río Bellós hasta La Ripareta (11 km • +400m)
+• *Domingo 11*: Cascada del Sorrosal & Senderos tradicionales de Broto (7.5 km)
+• *Lunes 12*: Desmontaje y vuelta tranquila a Valencia
+
+⛺ *Alojamiento*: Tienda de campaña en camping oficial (duchas calientes, zona verde junto al río).
+🔦 *Importante*: Frontal con pilas, saco de 0°C a 5°C y botas de monte.
+
+¡Miradlo aquí en la web del plan!`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('copy-toast');
+      if (toast) {
+        toast.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 3500);
+      }
+    });
+  });
+</script>

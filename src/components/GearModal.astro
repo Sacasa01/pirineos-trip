@@ -1,0 +1,145 @@
+---
+// src/components/GearModal.astro
+---
+
+<div 
+  id="gear-modal" 
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300"
+>
+  <div class="relative w-full max-w-xl bg-[#11161f] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 max-h-[88vh] flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-lg">
+          🎒
+        </span>
+        <div>
+          <h3 class="text-lg font-bold text-white leading-tight">Checklist de Material y Equipo</h3>
+          <p class="text-xs text-slate-400">Imprescindibles para 4 personas en octubre</p>
+        </div>
+      </div>
+      <button 
+        id="btn-close-gear-modal" 
+        class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Scrollable Checklist -->
+    <div class="flex-1 overflow-y-auto py-4 space-y-4 text-xs pr-1 custom-scrollbar">
+      <!-- Camping -->
+      <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+        <div class="flex items-center gap-2 font-bold text-amber-400 text-sm">
+          <span>⛺</span> Campamento (Camping Río Ara)
+        </div>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-amber-500 focus:ring-0" />
+            <span>Tienda de campaña para 4 personas (o 2 tiendas dobles)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-amber-500 focus:ring-0" />
+            <span>Sacos de dormir (temperatura confort 0º a +5ºC)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-amber-500 focus:ring-0" />
+            <span>Esterillas o aislantes térmicos autoinflables</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-amber-500 focus:ring-0" />
+            <span>Hornillo a gas de camping + cartuchos + cazuela y mechero</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" class="rounded border-white/20 text-amber-500 focus:ring-0" />
+            <span>Lámpara para tienda y cubiertos / vasos de camping</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Senderismo -->
+      <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+        <div class="flex items-center gap-2 font-bold text-cyan-400 text-sm">
+          <span>🥾</span> Senderismo & Ropa (Sistema 3 Capas)
+        </div>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-cyan-500 focus:ring-0" />
+            <span>Botas de senderismo o zapatillas de trail con buen taqueado</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-cyan-500 focus:ring-0" />
+            <span>Chubasquero o membrana impermeable / cortavientos (Gore-Tex)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-cyan-500 focus:ring-0" />
+            <span>Forro polar o chaqueta de plumas ligera para paradas</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-cyan-500 focus:ring-0" />
+            <span>Mochila de día (20-30 L) por persona</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" class="rounded border-white/20 text-cyan-500 focus:ring-0" />
+            <span>Bastones telescópicos de trekking (muy recomendados para Cazadores)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Seguridad e Hidratación -->
+      <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+        <div class="flex items-center gap-2 font-bold text-emerald-400 text-sm">
+          <span>💧</span> Hidratación, Seguridad & Tecnología
+        </div>
+        <div class="space-y-1.5 text-slate-300">
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-emerald-500 focus:ring-0" />
+            <span>Cantimplora o camelbak de al menos 1,5L por persona</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-emerald-500 focus:ring-0" />
+            <span>Frontales de luz LED con pilas de repuesto</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" checked class="rounded border-white/20 text-emerald-500 focus:ring-0" />
+            <span>Powerbank de 20.000 mAh para recargar móviles</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" class="rounded border-white/20 text-emerald-500 focus:ring-0" />
+            <span>Botiquín de primeros auxilios (tiritas compeed, analgésicos, manta térmica)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer hover:text-white">
+            <input type="checkbox" class="rounded border-white/20 text-emerald-500 focus:ring-0" />
+            <span>Protector solar y gafas de sol de montaña</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('gear-modal');
+    const closeBtn = document.getElementById('btn-close-gear-modal');
+
+    const openModal = () => {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.remove('scale-95');
+      modal.querySelector('.transform').classList.add('scale-100');
+    };
+
+    const closeModal = () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.transform').classList.add('scale-95');
+      modal.querySelector('.transform').classList.remove('scale-100');
+    };
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    window.addEventListener('open-gear-modal', openModal);
+  });
+</script>

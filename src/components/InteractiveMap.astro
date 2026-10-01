@@ -1,0 +1,296 @@
+---
+// src/components/InteractiveMap.astro
+import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
+---
+
+<div class="relative w-full h-full flex-1 overflow-hidden select-none">
+  <!-- Minimal Top-Right Controls -->
+  <div class="absolute top-4 right-4 z-20 flex items-center gap-2 pointer-events-auto">
+    <button 
+      id="btn-toggle-layer" 
+      class="px-3 py-1.5 rounded-xl bg-[#111620]/90 backdrop-blur-md border border-white/15 text-slate-300 hover:text-white text-xs font-semibold shadow-lg transition-all hover:bg-white/15"
+    >
+      🛰️ Satélite
+    </button>
+    <button 
+      id="btn-recenter-map" 
+      class="w-8 h-8 rounded-xl bg-[#111620]/90 backdrop-blur-md border border-white/15 text-slate-300 hover:text-white text-xs flex items-center justify-center shadow-lg transition-all hover:bg-white/15"
+      title="Vista panorámica"
+    >
+      🎯
+    </button>
+  </div>
+
+  <!-- Leaflet Map Canvas -->
+  <div id="full-trip-map" class="w-full h-full bg-[#0a0d12] z-0"></div>
+
+  <!-- Floating POI Card (Bottom-Left, compact) -->
+  <div 
+    id="poi-detail-card" 
+    class="absolute bottom-5 left-5 z-20 w-[320px] sm:w-[350px] max-w-[88vw] bg-[#111620]/95 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-2xl transition-all duration-300 transform translate-y-0 opacity-100"
+  >
+    <button id="btn-close-poi-card" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/60 hover:bg-black/90 text-slate-400 hover:text-white flex items-center justify-center transition-all z-10 text-xs">✕</button>
+
+    <!-- Image -->
+    <div class="relative h-28 rounded-2xl overflow-hidden mb-3 border border-white/10">
+      <img id="poi-card-image" src="https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&auto=format&fit=crop&q=80" alt="" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent"></div>
+      <span id="poi-card-badge" class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-amber-500 text-obsidian font-black text-xs shadow-md">Día 1</span>
+      <div class="absolute bottom-2 left-2.5 right-2.5 flex items-center gap-2 text-[10.5px] font-semibold text-white">
+        <span id="poi-card-duration" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">⏱️ 6-7 h</span>
+        <span id="poi-card-distance" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">📏 20 km</span>
+        <span id="poi-card-elevation" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 text-emerald-300">⛰️ +750 m</span>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h3 id="poi-card-title" class="text-sm font-bold text-white leading-tight">Senda de los Cazadores</h3>
+    <p id="poi-card-subtitle" class="text-xs text-amber-400 font-medium mb-1.5">Valle de Ordesa · Cola de Caballo</p>
+    <p id="poi-card-desc" class="text-[11px] text-slate-300 leading-relaxed line-clamp-2 mb-3">Subida al Mirador de Calcilarruego, travesía por la Faja de Pelay y bajada por las cascadas del fondo del valle.</p>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 pt-2 border-t border-white/10">
+      <button id="btn-poi-center" class="flex-1 py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-obsidian font-bold text-xs flex items-center justify-center gap-1 shadow-md active:scale-95 transition-all">
+        📍 Centrar
+      </button>
+      <a id="btn-poi-gmaps" href="#" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 border border-white/10 transition-all">
+        ↗️ Google Maps
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script is:inline define:vars={{ TRIP_DAYS, MAP_PINS }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const panoramicCenter = [42.6350, -0.0500];
+    const map = L.map('full-trip-map', {
+      center: panoramicCenter,
+      zoom: 12,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Tile layers
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19
+    }).addTo(map);
+
+    const openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
+
+    let currentLayer = 'satellite';
+    document.getElementById('btn-toggle-layer')?.addEventListener('click', function() {
+      if (currentLayer === 'satellite') {
+        map.removeLayer(esriSatellite);
+        map.addLayer(openTopo);
+        currentLayer = 'topo';
+        this.innerHTML = '🗺️ Topo';
+      } else {
+        map.removeLayer(openTopo);
+        map.addLayer(esriSatellite);
+        currentLayer = 'satellite';
+        this.innerHTML = '🛰️ Satélite';
+      }
+    });
+
+    // ─── RENDER DRIVE PATHS (dashed, thinner, connecting Torla to trailheads) ───
+    const driveLayers = {};
+    TRIP_DAYS.forEach(day => {
+      if (!day.drivePath || day.drivePath.length === 0) return;
+      const drive = L.polyline(day.drivePath, {
+        color: day.color,
+        weight: 2.5,
+        opacity: 0.55,
+        dashArray: '8, 6',
+        lineCap: 'round'
+      }).addTo(map);
+      driveLayers[day.id] = drive;
+    });
+
+    // ─── RENDER HIKING ROUTES (solid, glowing) ───
+    const routeLayers = {};
+    const glowLayers = {};
+
+    TRIP_DAYS.forEach(day => {
+      if (!day.routePath || day.routePath.length === 0) return;
+
+      // Glow
+      const glow = L.polyline(day.routePath, {
+        color: day.color,
+        weight: 10,
+        opacity: 0.35,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+      glowLayers[day.id] = glow;
+
+      // Main trail
+      const line = L.polyline(day.routePath, {
+        color: day.color,
+        weight: 4,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+      routeLayers[day.id] = line;
+
+      line.on('click', () => selectDay(day.id));
+      line.on('mouseover', () => {
+        line.setStyle({ weight: 6 });
+        glow.setStyle({ opacity: 0.65, weight: 14 });
+      });
+      line.on('mouseout', () => {
+        if (currentActiveDay !== day.id) {
+          line.setStyle({ weight: 4 });
+          glow.setStyle({ opacity: 0.35, weight: 10 });
+        }
+      });
+    });
+
+    // ─── RENDER MAP PINS (compact pill labels with short names) ───
+    MAP_PINS.forEach(pin => {
+      const isCamping = pin.badge === '⛺';
+      const pinHtml = `
+        <div class="cursor-pointer group select-none transition-transform hover:scale-110 active:scale-95" style="transform: translate(-50%, -50%)">
+          <div style="
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 8px; border-radius: 999px;
+            background: ${isCamping ? 'rgba(5,46,22,0.92)' : 'rgba(17,22,32,0.92)'};
+            border: 1px solid ${isCamping ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.2)'};
+            backdrop-filter: blur(8px);
+            color: white; font-family: Inter, system-ui, sans-serif;
+            font-size: 11px; font-weight: 700; white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          ">
+            <span style="
+              width: 16px; height: 16px; border-radius: 50%;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 10px; font-weight: 900;
+              color: ${isCamping ? '#052e16' : '#0c1014'};
+              background-color: ${isCamping ? '#4ade80' : pin.color};
+            ">${pin.badge}</span>
+            <span style="color: ${isCamping ? '#86efac' : '#e2e8f0'}">${pin.name}</span>
+          </div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        className: '',
+        html: pinHtml,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+
+      const marker = L.marker(pin.coords, { icon }).addTo(map);
+      marker.on('click', () => {
+        if (pin.id === 'camping') {
+          map.flyTo(pin.coords, 14, { duration: 1 });
+        } else {
+          selectDay(pin.id);
+        }
+      });
+    });
+
+    // ─── POI CARD ───
+    const poiCard = document.getElementById('poi-detail-card');
+    const els = {
+      image: document.getElementById('poi-card-image'),
+      badge: document.getElementById('poi-card-badge'),
+      title: document.getElementById('poi-card-title'),
+      subtitle: document.getElementById('poi-card-subtitle'),
+      desc: document.getElementById('poi-card-desc'),
+      duration: document.getElementById('poi-card-duration'),
+      distance: document.getElementById('poi-card-distance'),
+      elevation: document.getElementById('poi-card-elevation'),
+      gmaps: document.getElementById('btn-poi-gmaps'),
+      center: document.getElementById('btn-poi-center')
+    };
+
+    let currentActiveDay = 'dia-1';
+
+    function updatePoiCard(day) {
+      if (!day || !poiCard) return;
+      poiCard.classList.remove('translate-y-full', 'opacity-0');
+
+      els.image.src = day.poi.image;
+      els.badge.innerText = `Día ${day.dayNumber}`;
+      els.badge.style.backgroundColor = day.color;
+      els.title.innerText = day.poi.name;
+      els.subtitle.innerText = day.poi.subtitle;
+      els.subtitle.style.color = day.color;
+      els.desc.innerText = day.poi.description;
+      els.duration.innerText = `⏱️ ${day.poi.duration}`;
+      els.distance.innerText = `📏 ${day.poi.distance}`;
+      els.elevation.innerText = `⛰️ ${day.poi.elevation}`;
+      els.gmaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.poi.name + ' Ordesa')}`;
+    }
+
+    function selectDay(dayId) {
+      if (dayId === 'all') {
+        // Reset all layers to normal
+        TRIP_DAYS.forEach(d => {
+          if (routeLayers[d.id]) {
+            routeLayers[d.id].setStyle({ opacity: 0.95, weight: 4 });
+            glowLayers[d.id].setStyle({ opacity: 0.35, weight: 10 });
+          }
+          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.55 });
+        });
+        map.flyTo(panoramicCenter, 12, { duration: 1.2 });
+        return;
+      }
+
+      const selected = TRIP_DAYS.find(d => d.id === dayId);
+      if (!selected) return;
+
+      currentActiveDay = dayId;
+      updatePoiCard(selected);
+
+      // Highlight selected, dim others
+      TRIP_DAYS.forEach(d => {
+        if (!routeLayers[d.id]) return;
+        if (d.id === dayId) {
+          routeLayers[d.id].setStyle({ opacity: 1, weight: 6 });
+          glowLayers[d.id].setStyle({ opacity: 0.7, weight: 14 });
+          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.8, weight: 3 });
+        } else {
+          routeLayers[d.id].setStyle({ opacity: 0.2, weight: 2 });
+          glowLayers[d.id].setStyle({ opacity: 0.05 });
+          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.15 });
+        }
+      });
+
+      // Build bounds that include both drive path and hike path
+      const allCoords = [...(selected.drivePath || []), ...(selected.routePath || [])];
+      if (allCoords.length > 0) {
+        const bounds = L.latLngBounds(allCoords);
+        map.flyToBounds(bounds, { padding: [60, 60], maxZoom: 14, duration: 1.2 });
+      } else {
+        map.flyTo(selected.poi.coords, 14, { duration: 1.2 });
+      }
+    }
+
+    // Recenter
+    document.getElementById('btn-recenter-map')?.addEventListener('click', () => selectDay('all'));
+
+    // Close POI card
+    document.getElementById('btn-close-poi-card')?.addEventListener('click', () => {
+      poiCard.classList.add('translate-y-full', 'opacity-0');
+    });
+
+    // Center button in POI card
+    els.center?.addEventListener('click', () => selectDay(currentActiveDay));
+
+    // Global events
+    window.addEventListener('select-day', (e) => selectDay(e.detail.dayId));
+    window.addEventListener('resize', () => map.invalidateSize());
+    window.addEventListener('drawer-toggle', () => setTimeout(() => map.invalidateSize(), 320));
+
+    // Initial
+    updatePoiCard(TRIP_DAYS[0]);
+  });
+</script>

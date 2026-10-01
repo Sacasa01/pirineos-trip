@@ -1,0 +1,27 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import SidebarNav from '../components/SidebarNav.astro';
+import ItineraryDrawer from '../components/ItineraryDrawer.astro';
+import InteractiveMap from '../components/InteractiveMap.astro';
+import BudgetModal from '../components/BudgetModal.astro';
+import GearModal from '../components/GearModal.astro';
+import { TRIP_META } from '../data/tripData';
+---
+
+<Layout title={`${TRIP_META.title} • Visor Cartográfico & Itinerario`}>
+  <div class="flex h-screen w-screen overflow-hidden bg-[#0c1014] text-slate-100 relative font-sans">
+    <!-- Slim Left Icon Navigation Bar -->
+    <SidebarNav />
+
+    <!-- Collapsible Day-by-Day Timeline Drawer -->
+    <ItineraryDrawer />
+
+    <!-- Full-screen Satellite Interactive Map with Floating POI Card & Controls -->
+    <InteractiveMap />
+
+    <!-- Modals for Budget and Gear Checklist -->
+    <BudgetModal />
+    <GearModal />
+  </div>
+</Layout>

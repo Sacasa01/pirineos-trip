@@ -1,0 +1,220 @@
+---
+// src/components/ItineraryDrawer.astro
+// Panel de la izquierda con dos modos: "Ruta" (simplificado) e "Itinerario" (detallado)
+import { TRIP_DAYS, TRIP_META } from '../data/tripData';
+
+const iconMap: Record<string, string> = {
+  car: '🚗', bus: '🚌', hike: '🥾', picnic: '🥪',
+  camp: '⛺', food: '🍽️', info: 'ℹ️'
+};
+---
+
+<div 
+  id="itinerary-drawer"
+  class="w-[370px] sm:w-[400px] max-w-[92vw] h-screen bg-[#11161d] border-r border-white/10 flex flex-col z-30 shrink-0 transition-transform duration-300 ease-in-out shadow-2xl relative"
+>
+  <!-- ═══════════ PANEL 1: RUTA (simplificado) ═══════════ -->
+  <div id="panel-ruta" class="flex flex-col h-full">
+
+    <!-- Header -->
+    <div class="p-4 border-b border-white/10 bg-[#151b24] shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-sm">🏔️</span>
+          <div>
+            <h2 class="text-sm font-bold text-white">Ruta del Viaje</h2>
+            <p class="text-[11px] text-slate-400">{TRIP_META.dates} · 4 amigos</p>
+          </div>
+        </div>
+        <button id="btn-close-drawer-ruta" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10" title="Ocultar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable route cards (simplified) -->
+    <div class="flex-1 overflow-y-auto p-3.5 space-y-3 custom-scrollbar">
+      {TRIP_DAYS.map((day) => (
+        <div 
+          data-day-id={day.id}
+          class="route-card rounded-2xl bg-[#161d28] hover:bg-[#1a2230] border border-white/10 hover:border-white/20 p-3.5 transition-all cursor-pointer group"
+        >
+          <!-- Day header -->
+          <div class="flex items-center gap-2.5 mb-2.5">
+            <span 
+              class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0 shadow-sm"
+              style={`background-color: ${day.color}`}
+            >
+              {day.dayNumber}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{day.dateTitleShort}</div>
+              <h3 class="text-sm font-bold text-white truncate group-hover:text-amber-300 transition-colors">{day.routeTitle}</h3>
+            </div>
+          </div>
+
+          {/* Si hay ruta de senderismo, mostrar resumen */}
+          {day.routeSummary.startHike ? (
+            <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">🚗</span>
+                <span>{day.routeSummary.depart}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">🥾</span>
+                <span class="font-semibold text-white">{day.routeSummary.startHike}</span>
+              </div>
+              {day.poi.duration !== '-' && (
+                <div class="flex items-center gap-3 text-[10.5px] text-slate-400 pl-6">
+                  <span>⏱️ {day.poi.duration}</span>
+                  <span>📏 {day.poi.distance}</span>
+                  <span class="text-emerald-400">⛰️ {day.poi.elevation}</span>
+                </div>
+              )}
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">🏁</span>
+                <span>{day.routeSummary.endHike}</span>
+              </div>
+            </div>
+          ) : (
+            <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
+              <div class="flex items-center gap-2">
+                <span class="text-slate-500">🚗</span>
+                <span>{day.routeSummary.depart}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Dónde dormimos */}
+          <div class="mt-2.5 ml-9 flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
+            <span>⛺</span>
+            <span>{day.routeSummary.sleep}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Budget footer -->
+    <div class="p-3 border-t border-white/10 bg-[#151b24] shrink-0">
+      <button id="btn-budget-ruta" class="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 flex items-center justify-between text-xs transition-all">
+        <div class="flex items-center gap-2">
+          <span>💰</span>
+          <span class="text-[11px] font-bold text-white">Presupuesto</span>
+        </div>
+        <span class="text-xs font-black text-emerald-400">~58,75 € / pers</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ PANEL 2: ITINERARIO (detallado hora a hora) ═══════════ -->
+  <div id="panel-itinerario" class="hidden flex flex-col h-full">
+
+    <!-- Header -->
+    <div class="p-4 border-b border-white/10 bg-[#151b24] shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-sm">📋</span>
+          <div>
+            <h2 class="text-sm font-bold text-white">Itinerario Detallado</h2>
+            <p class="text-[11px] text-slate-400">Cronograma completo hora a hora</p>
+          </div>
+        </div>
+        <button id="btn-close-drawer-itinerario" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10" title="Ocultar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable full timeline -->
+    <div class="flex-1 overflow-y-auto p-3.5 space-y-4 custom-scrollbar">
+      {TRIP_DAYS.map((day) => (
+        <div data-day-id={day.id} class="itinerary-day-block">
+          <!-- Day divider -->
+          <div class="flex items-center gap-2 mb-2.5 sticky top-0 z-10 bg-[#11161d] py-1">
+            <span 
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0"
+              style={`background-color: ${day.color}`}
+            >
+              {day.dayNumber}
+            </span>
+            <div>
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{day.dateTitle}</div>
+              <div class="text-xs font-bold text-white">{day.routeTitle}</div>
+            </div>
+          </div>
+
+          <!-- Full timeline -->
+          <ol class="relative border-l border-white/15 ml-3 space-y-2 pb-2">
+            {day.timeline.map((step) => (
+              <li class="ml-3 text-[11.5px] leading-relaxed">
+                <span 
+                  class="absolute -left-[5px] mt-1.5 w-2.5 h-2.5 rounded-full border-2 border-[#11161d]"
+                  style={`background-color: ${day.color}`}
+                ></span>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-[10.5px] font-bold text-amber-400 shrink-0 font-mono w-9">{step.time}</span>
+                  <span class="text-xs shrink-0">{iconMap[step.icon] || '📍'}</span>
+                  <span class="text-slate-300 text-[11px]">{step.activity}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const drawer = document.getElementById('itinerary-drawer');
+    const panelRuta = document.getElementById('panel-ruta');
+    const panelItinerario = document.getElementById('panel-itinerario');
+    const closeRuta = document.getElementById('btn-close-drawer-ruta');
+    const closeItinerario = document.getElementById('btn-close-drawer-itinerario');
+
+    function showPanel(panelId) {
+      if (panelId === 'ruta') {
+        panelRuta.classList.remove('hidden');
+        panelItinerario.classList.add('hidden');
+      } else if (panelId === 'itinerario') {
+        panelRuta.classList.add('hidden');
+        panelItinerario.classList.remove('hidden');
+      }
+      // Siempre abrir el drawer
+      drawer.classList.remove('-translate-x-full');
+      window.dispatchEvent(new CustomEvent('drawer-toggle', { detail: { isOpen: true } }));
+    }
+
+    function closeDrawer() {
+      drawer.classList.add('-translate-x-full');
+      window.dispatchEvent(new CustomEvent('drawer-toggle', { detail: { isOpen: false } }));
+    }
+
+    // Escuchar switch-panel desde la sidebar
+    window.addEventListener('switch-panel', (e) => {
+      showPanel(e.detail.panel);
+    });
+
+    // Cerrar drawer
+    closeRuta?.addEventListener('click', closeDrawer);
+    closeItinerario?.addEventListener('click', closeDrawer);
+
+    // Clicking a route card selects that day on the map
+    document.querySelectorAll('.route-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const dayId = card.getAttribute('data-day-id');
+        window.dispatchEvent(new CustomEvent('select-day', { detail: { dayId } }));
+      });
+    });
+
+    // Budget button
+    document.getElementById('btn-budget-ruta')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('open-budget-modal'));
+    });
+  });
+</script>
