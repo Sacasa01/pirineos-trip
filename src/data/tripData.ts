@@ -143,7 +143,7 @@ export const TRIP_DAYS: DayItinerary[] = [
       description: "Ruta oficial de Wikiloc (ID: 116398514). Sube por el valle de La Ripera y Rincón del Verde, visita el Refugio del Verde, corona la Collada y bordea el mágico lago glaciar del Ibón de Sabocos.",
       image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80"
     },
-    // Conexión en coche: Valencia -> Teruel -> Zaragoza -> Huesca -> Sabiñánigo -> Panticosa
+    // Conexión en coche: Valencia -> Teruel -> Zaragoza -> Huesca -> Sabiñánigo -> Biescas -> Panticosa
     drivePath: [
       VALENCIA,
       [40.3456, -1.1072], // Teruel
@@ -151,6 +151,7 @@ export const TRIP_DAYS: DayItinerary[] = [
       [42.1400, -0.4080], // Huesca
       [42.5180, -0.3640], // Sabiñánigo
       [42.6300, -0.3200], // Biescas
+      [42.7050, -0.3150], // Escarrilla
       PANTICOSA_PARKING
     ],
     // Trazado a pie exacto (Track 116398514): Panticosa -> Ripera -> Refugio Verde -> Collada -> Sabocos -> Travenosa -> Panticosa
@@ -223,13 +224,16 @@ export const TRIP_DAYS: DayItinerary[] = [
       description: "Ruta estelar de Wikiloc. Se aparca en el mismo refugio y se asciende al circo glaciar colgado de Otal cruzando el puente medieval del río Ara.",
       image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80"
     },
-    // Conexión en coche: Panticosa -> Biescas -> Torla -> Pista Bujaruelo
+    // Conexión en coche: Panticosa -> Biescas -> Puerto de Cotefablo -> Broto -> Torla -> Pista Bujaruelo
     drivePath: [
       PANTICOSA_PARKING,
+      [42.7050, -0.3150], // Escarrilla
       [42.6300, -0.3200], // Biescas
-      [42.6020, -0.1180], // Broto
+      [42.6120, -0.2030], // Puerto de Cotefablo (túnel)
+      [42.6030, -0.1200], // Broto
       [42.6280, -0.1110], // Torla
       [42.6530, -0.1030], // Puente de los Navarros
+      [42.6750, -0.1050], // Valle del Ara
       BUJARUELO_PARKING
     ],
     // Ruta a pie: Refugio Bujaruelo -> Puente -> Zetas -> Cancela Otal -> Circo Otal -> Vuelta al Refugio
@@ -302,10 +306,12 @@ export const TRIP_DAYS: DayItinerary[] = [
       description: "La ruta de senderismo más aclamada de toda España en Wikiloc. Sube por Cazadores, planea por Pelay y culmina en el refugio de Góriz (2.200 m) a los pies de Monte Perdido (3.355 m).",
       image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&auto=format&fit=crop&q=80"
     },
-    // Conexión en coche: Bujaruelo -> Puente de los Navarros -> Pradera Ordesa
+    // Conexión en coche: Bujaruelo -> Valle del Ara -> Puente de los Navarros -> Pradera Ordesa
     drivePath: [
       BUJARUELO_PARKING,
-      [42.6530, -0.1030],
+      [42.6750, -0.1050], // Pista Valle del Ara
+      [42.6530, -0.1030], // Puente de los Navarros
+      [42.6480, -0.0820], // Entrada Parque Ordesa
       ORDESA_PRADERA
     ],
     // Ruta a pie: Pradera -> Cazadores -> Faja Pelay -> Cola Caballo -> Góriz
@@ -378,11 +384,16 @@ export const TRIP_DAYS: DayItinerary[] = [
       description: "Garganta kárstica monumental de Wikiloc. El sendero serpentea por el fondo del cañón del Bellós hasta las cascadas y refugio de Fuen Blanca.",
       image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format&fit=crop&q=80"
     },
-    // Conexión en coche: Ordesa -> Broto -> Fanlo -> San Úrbez
+    // Conexión en coche: Ordesa -> Puente de los Navarros -> Torla -> Broto -> Fanlo -> San Úrbez
     drivePath: [
       ORDESA_PRADERA,
-      [42.6020, -0.1180], // Broto
-      [42.5800, -0.0800], // Fanlo
+      [42.6480, -0.0820],
+      [42.6530, -0.1030], // Puente de los Navarros
+      [42.6280, -0.1110], // Torla
+      [42.6030, -0.1200], // Broto
+      [42.5870, -0.1150], // Sarvisé
+      [42.5880, -0.0190], // Fanlo
+      [42.5750, 0.0150],  // Collado Fanlo
       ANISCLO_SAN_URBEZ
     ],
     // Ruta a pie: San Úrbez -> Molino Aso -> Garganta Bellós -> La Ripareta -> Refugio Fuen Blanca -> Vuelta
@@ -458,14 +469,24 @@ export const TRIP_DAYS: DayItinerary[] = [
       description: "Ruta oficial de Wikiloc hacia el Refugio Ángel Orús (2.148 m). Etapa reina bajo el Posets (3.375 m) antes de iniciar el viaje de vuelta directo a Valencia.",
       image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80"
     },
-    // Conexión en coche: Añisclo/Aínsa -> Campo -> Eriste -> y regreso directo a Valencia
+    // Conexión en coche: Añisclo/Escalona -> Aínsa -> Campo -> Ventamillo -> Benasque y retorno a Valencia
     drivePath: [
       ANISCLO_SAN_URBEZ,
-      [42.4170, 0.1380], // Aínsa
-      [42.4100, 0.3950], // Campo
+      [42.5450, 0.0900],  // Desfiladero de las Cambras
+      [42.5020, 0.1480],  // Escalona
+      [42.4170, 0.1380],  // Aínsa
+      [42.4080, 0.3550],  // Foradada de Toscar
+      [42.4080, 0.3950],  // Campo
+      [42.4850, 0.4480],  // Congosto de Ventamillo
+      [42.5120, 0.4900],  // Castejón de Sos
+      [42.5880, 0.4900],  // Eriste
       BENASQUE_ESPIGANTOSA,
-      [42.1900, 0.3370], // Graus hacia el sur
-      [42.0080, 0.1260], // Barbastro
+      [42.5880, 0.4900],  // Regreso: Eriste
+      [42.5120, 0.4900],  // Castejón de Sos
+      [42.4080, 0.3950],  // Campo
+      [42.1900, 0.3370],  // Graus
+      [42.0080, 0.1260],  // Barbastro
+      [42.1400, -0.4080], // Huesca
       [41.6488, -0.8891], // Zaragoza
       [40.3456, -1.1072], // Teruel
       VALENCIA

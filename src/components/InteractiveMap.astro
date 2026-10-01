@@ -22,10 +22,12 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
   </div>
 
   <!-- Legend in Map (Bottom-Right, subtle) -->
-  <div class="hidden sm:flex absolute bottom-5 right-5 z-20 bg-[#111620]/90 backdrop-blur-md border border-white/15 rounded-2xl px-3.5 py-2 text-[11px] items-center gap-4 text-slate-300 shadow-xl pointer-events-none">
+  <div class="hidden sm:flex absolute bottom-5 right-5 z-20 bg-[#111620]/90 backdrop-blur-md border border-white/15 rounded-2xl px-3.5 py-2 text-[11px] items-center gap-3.5 text-slate-300 shadow-xl pointer-events-none">
     <div class="flex items-center gap-1.5">
-      <span class="text-sky-400 font-bold">➤</span>
-      <span>En coche</span>
+      <span class="inline-flex w-4 h-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8] relative overflow-hidden">
+        <span class="absolute inset-0 bg-white/70 animate-pulse"></span>
+      </span>
+      <span>En coche (flujo animado)</span>
     </div>
     <div class="flex items-center gap-1.5">
       <span class="w-3.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
@@ -34,6 +36,12 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
     <div class="flex items-center gap-1.5">
       <span>🛖</span>
       <span>Refugio</span>
+    </div>
+    <div class="flex items-center gap-1 border-l border-white/15 pl-2.5 text-slate-400">
+      <span class="w-4 h-4 rounded-full bg-white/15 text-slate-200 font-bold text-[9px] flex items-center justify-center">1</span>
+      <span class="text-[10px]">➔</span>
+      <span class="w-4 h-4 rounded-full bg-white/15 text-slate-200 font-bold text-[9px] flex items-center justify-center">5</span>
+      <span class="text-[10px] ml-0.5">Etapas</span>
     </div>
   </div>
 
@@ -170,63 +178,36 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
       }
     });
 
-    // ─── CÁLCULO DE ÁNGULO (BEARING) PARA FLECHAS DE DIRECCIÓN EN CARRETERA ───
-    function getBearing(lat1, lon1, lat2, lon2) {
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
-      const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-                Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
-      const brng = Math.atan2(y, x) * 180 / Math.PI;
-      return (brng + 360) % 360;
-    }
-
-    // ─── LÍNEAS DE CARRETERA (COCHE): COLOR AZUL CIELO CON FLECHAS DE DIRECCIÓN ───
-    const driveLayers = {};
-    const arrowMarkers = [];
+    // ─── LÍNEAS DE CARRETERA (COCHE): LÍNEA ANIMADA CON FLUJO CONTINUO EN EL SENTIDO DE LA MARCHA ───
+    const driveCasingLayers = {};
+    const driveFlowLayers = {};
 
     TRIP_DAYS.forEach(day => {
       if (!day.drivePath || day.drivePath.length < 2) return;
 
-      // Línea principal de carretera
-      const driveLine = L.polyline(day.drivePath, {
-        color: '#38bdf8', // Sky blue
-        weight: 3.5,
-        opacity: 0.7,
+      // 1. Casing subyacente (asfalto azul profundo)
+      const casing = L.polyline(day.drivePath, {
+        color: '#0284c7', // Sky-600
+        weight: 6,
+        opacity: 0.45,
         lineCap: 'round',
         lineJoin: 'round'
       }).addTo(map);
-      driveLayers[day.id] = driveLine;
+      driveCasingLayers[day.id] = casing;
 
-      // Flechas en los tramos intermedios de la carretera para indicar el sentido
-      for (let i = 0; i < day.drivePath.length - 1; i++) {
-        const p1 = day.drivePath[i];
-        const p2 = day.drivePath[i + 1];
-        const midLat = (p1[0] + p2[0]) / 2;
-        const midLng = (p1[1] + p2[1]) / 2;
-        const bearing = getBearing(p1[0], p1[1], p2[0], p2[1]);
+      // 2. Trazado animado: flujo de guiones que se desplazan hacia el destino
+      const flowLine = L.polyline(day.drivePath, {
+        className: 'car-route-animated',
+        color: '#38bdf8', // Sky-400 / cyan brillante
+        weight: 3.5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+      driveFlowLayers[day.id] = flowLine;
 
-        const arrowHtml = `
-          <div style="
-            transform: translate(-50%, -50%) rotate(${bearing}deg);
-            color: #38bdf8;
-            font-size: 13px;
-            font-weight: 900;
-            text-shadow: 0 0 5px rgba(0,0,0,0.9);
-            line-height: 1;
-            pointer-events: none;
-          ">➤</div>
-        `;
-
-        const arrowIcon = L.divIcon({
-          className: '',
-          html: arrowHtml,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7]
-        });
-
-        const arrowMarker = L.marker([midLat, midLng], { icon: arrowIcon, interactive: false }).addTo(map);
-        arrowMarkers.push(arrowMarker);
-      }
+      flowLine.on('click', () => selectDay(day.id));
+      casing.on('click', () => selectDay(day.id));
     });
 
     // ─── SENDEROS DE MONTAÑA (A PIE): LÍNEAS RESPLANDECIENTES QUE PASAN POR EL REFUGIO ───
@@ -269,28 +250,29 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
       });
     });
 
-    // ─── MARCADORES DE RUTA (NÚMERO + NOMBRE COMPACTO) ───
+    // ─── MARCADORES DE RUTA (NÚMERO SECUENCIAL PROMINENTE + DESTINO COMPACTO) ───
     MAP_PINS.forEach(pin => {
       const pinHtml = `
-        <div class="cursor-pointer group select-none transition-transform hover:scale-110 active:scale-95" style="transform: translate(-50%, -50%)">
+        <div class="cursor-pointer group select-none transition-all duration-200 hover:scale-110 active:scale-95" style="transform: translate(-50%, -50%)">
           <div style="
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 10px; border-radius: 999px;
-            background: rgba(17, 22, 32, 0.94);
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 11px 4px 5px; border-radius: 999px;
+            background: rgba(15, 20, 30, 0.95);
             border: 1.5px solid ${pin.color};
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             color: white; font-family: Inter, system-ui, sans-serif;
-            font-size: 11px; font-weight: 800; white-space: nowrap;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.7);
+            font-size: 11.5px; font-weight: 800; white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.8), 0 0 12px ${pin.color}40;
           ">
             <span style="
-              width: 17px; height: 17px; border-radius: 50%;
+              width: 20px; height: 20px; border-radius: 50%;
               display: flex; align-items: center; justify-content: center;
-              font-size: 10px; font-weight: 900;
-              color: #0c1014;
+              font-size: 11px; font-weight: 900;
+              color: #080c12;
               background-color: ${pin.color};
+              box-shadow: 0 0 8px ${pin.color};
             ">${pin.badge}</span>
-            <span style="color: #f8fafc">${pin.name}</span>
+            <span style="color: #f1f5f9; letter-spacing: -0.2px;">${pin.name}</span>
           </div>
         </div>
       `;
@@ -404,7 +386,10 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
             routeLayers[d.id].setStyle({ opacity: 0.95, weight: 5 });
             glowLayers[d.id].setStyle({ opacity: 0.45, weight: 12 });
           }
-          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.7 });
+          if (driveFlowLayers[d.id]) {
+            driveFlowLayers[d.id].setStyle({ opacity: 0.95, weight: 3.5 });
+            driveCasingLayers[d.id].setStyle({ opacity: 0.45, weight: 6 });
+          }
         });
         map.flyTo(panoramicCenter, panoramicZoom, { duration: 1.2 });
         return;
@@ -418,15 +403,16 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
 
       // Resaltar ruta activa y atenuar las demás
       TRIP_DAYS.forEach(d => {
-        if (!routeLayers[d.id]) return;
         if (d.id === dayId) {
-          routeLayers[d.id].setStyle({ opacity: 1, weight: 7 });
-          glowLayers[d.id].setStyle({ opacity: 0.85, weight: 16 });
-          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 1, weight: 4.5 });
+          if (routeLayers[d.id]) routeLayers[d.id].setStyle({ opacity: 1, weight: 7 });
+          if (glowLayers[d.id]) glowLayers[d.id].setStyle({ opacity: 0.85, weight: 16 });
+          if (driveFlowLayers[d.id]) driveFlowLayers[d.id].setStyle({ opacity: 1, weight: 5 });
+          if (driveCasingLayers[d.id]) driveCasingLayers[d.id].setStyle({ opacity: 0.8, weight: 9 });
         } else {
-          routeLayers[d.id].setStyle({ opacity: 0.25, weight: 2.5 });
-          glowLayers[d.id].setStyle({ opacity: 0.05 });
-          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.2 });
+          if (routeLayers[d.id]) routeLayers[d.id].setStyle({ opacity: 0.2, weight: 2.5 });
+          if (glowLayers[d.id]) glowLayers[d.id].setStyle({ opacity: 0.05 });
+          if (driveFlowLayers[d.id]) driveFlowLayers[d.id].setStyle({ opacity: 0.2, weight: 2.5 });
+          if (driveCasingLayers[d.id]) driveCasingLayers[d.id].setStyle({ opacity: 0.15, weight: 4 });
         }
       });
 
@@ -464,3 +450,25 @@ import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
     updatePoiCard(TRIP_DAYS[0]);
   });
 </script>
+
+<style is:global>
+  /* Animación continua de flujo en carretera (dirección de la ruta) */
+  @keyframes flowCarLine {
+    from {
+      stroke-dashoffset: 22;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .car-route-animated {
+    stroke-dasharray: 8 14 !important;
+    animation: flowCarLine 1.2s linear infinite !important;
+    cursor: pointer;
+  }
+
+  .car-route-animated:hover {
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.9));
+  }
+</style>
