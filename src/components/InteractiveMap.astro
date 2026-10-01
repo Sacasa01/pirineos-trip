@@ -1,6 +1,6 @@
 ---
 // src/components/InteractiveMap.astro
-import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
+import { TRIP_DAYS, MAP_PINS, REFUGIO_PINS } from '../data/tripData';
 ---
 
 <div class="relative w-full h-full flex-1 overflow-hidden select-none">
@@ -24,42 +24,72 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
   <!-- Leaflet Map Canvas -->
   <div id="full-trip-map" class="w-full h-full bg-[#0a0d12] z-0"></div>
 
-  <!-- Floating POI Card (Bottom-Left, compact) -->
+  <!-- Floating POI & Refugio Detail Card (Bottom-Left) -->
   <div 
     id="poi-detail-card" 
-    class="absolute bottom-5 left-5 z-20 w-[320px] sm:w-[360px] max-w-[88vw] bg-[#111620]/95 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-2xl transition-all duration-300 transform translate-y-0 opacity-100"
+    class="absolute bottom-5 left-5 z-20 w-[340px] sm:w-[380px] max-w-[90vw] bg-[#111620]/95 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-2xl transition-all duration-300 transform translate-y-0 opacity-100 max-h-[82vh] overflow-y-auto custom-scrollbar"
   >
     <button id="btn-close-poi-card" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-black/60 hover:bg-black/90 text-slate-400 hover:text-white flex items-center justify-center transition-all z-10 text-xs">✕</button>
 
     <!-- Image -->
     <div class="relative h-28 rounded-2xl overflow-hidden mb-3 border border-white/10">
       <img id="poi-card-image" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80" alt="" class="w-full h-full object-cover" />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent"></div>
       <span id="poi-card-badge" class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-amber-500 text-obsidian font-black text-xs shadow-md">Día 1</span>
       <div class="absolute bottom-2 left-2.5 right-2.5 flex items-center gap-2 text-[10.5px] font-semibold text-white">
         <span id="poi-card-duration" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">⏱️ 3.5-4 h</span>
-        <span id="poi-card-distance" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">📏 8 km</span>
+        <span id="poi-card-distance" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10">📏 7,5 km</span>
         <span id="poi-card-elevation" class="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/10 text-emerald-300">⛰️ +650 m</span>
       </div>
     </div>
 
-    <!-- Title -->
-    <h3 id="poi-card-title" class="text-sm font-bold text-white leading-tight">Benasque / Posets</h3>
-    <p id="poi-card-subtitle" class="text-xs text-amber-400 font-medium mb-1.5">Macizo del Posets · Refugio Ángel Orús (2.148 m)</p>
-    <p id="poi-card-desc" class="text-[11px] text-slate-300 leading-relaxed line-clamp-2 mb-2">Ascensión por el Valle de Eriste bajo las murallas del Posets (3.375 m) hasta el refugio Ángel Orús.</p>
+    <!-- Title & Subtitle -->
+    <h3 id="poi-card-title" class="text-base font-bold text-white leading-tight">Benasque / Posets</h3>
+    <p id="poi-card-subtitle" class="text-xs text-amber-400 font-medium mb-2">Macizo del Posets · Refugio Ángel Orús (2.148 m)</p>
+    <p id="poi-card-desc" class="text-[11px] text-slate-300 leading-relaxed mb-3 line-clamp-2">Ascensión por el Valle de Eriste desde la Cascada de Espigantosa hasta el pie del Posets.</p>
 
-    <div id="poi-card-refugio" class="text-[11px] text-emerald-300 font-semibold mb-3 flex items-center gap-1.5">
-      <span>🛖</span>
-      <span>Alojamiento: Refugio Ángel Orús</span>
+    <!-- Refugio Highlight Box -->
+    <div id="poi-card-refugio-box" class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-3 text-xs">
+      <div class="flex items-center justify-between font-bold text-emerald-300 mb-1">
+        <div class="flex items-center gap-1.5">
+          <span class="text-sm">🛖</span>
+          <span id="poi-card-refugio-name">Refugio Ángel Orús</span>
+        </div>
+        <span id="poi-card-refugio-alt" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20">2.148 m</span>
+      </div>
+      <p id="poi-card-refugio-services" class="text-[10.5px] text-slate-300 leading-snug">Cena caliente, literas, mantas, agua caliente, taquillas, bar</p>
     </div>
 
-    <!-- Actions -->
+    <!-- Wikiloc Track Box -->
+    <div id="poi-card-wikiloc-box" class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 mb-3 text-xs">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[10.5px] font-bold text-emerald-400 flex items-center gap-1">
+          <span>🟢</span> Wikiloc Oficial
+        </span>
+        <span id="poi-card-wikiloc-rating" class="text-[10px] text-amber-300 font-semibold">⭐⭐⭐⭐⭐ 4.9</span>
+      </div>
+      <p id="poi-card-wikiloc-title" class="text-[11px] font-semibold text-white leading-snug mb-1.5 truncate">
+        Espigantosa ➔ Refugio Ángel Orús
+      </p>
+      <a 
+        id="poi-card-wikiloc-link" 
+        href="#" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-300 hover:text-white transition-colors"
+      >
+        <span>Ver track GPS en Wikiloc</span>
+        <span>↗️</span>
+      </a>
+    </div>
+
+    <!-- Action Buttons -->
     <div class="flex items-center gap-2 pt-2 border-t border-white/10">
       <button id="btn-poi-center" class="flex-1 py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-obsidian font-bold text-xs flex items-center justify-center gap-1 shadow-md active:scale-95 transition-all">
         📍 Centrar
       </button>
-      <a id="btn-poi-gmaps" href="https://www.google.com/maps/search/?api=1&query=Refugio+Angel+Orus+Benasque" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 border border-white/10 transition-all">
-        ↗️ Google Maps
+      <a id="btn-poi-booking" href="#" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 border border-white/10 transition-all">
+        🛖 Reservar
       </a>
     </div>
   </div>
@@ -69,9 +99,9 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<script is:inline define:vars={{ TRIP_DAYS, MAP_PINS }}>
+<script is:inline define:vars={{ TRIP_DAYS, MAP_PINS, REFUGIO_PINS }}>
   document.addEventListener('DOMContentLoaded', () => {
-    // Vista panorámica amplia de los Pirineos oscenses (Benasque a Panticosa)
+    // Vista panorámica amplia de los Pirineos (Benasque a Panticosa)
     const panoramicCenter = [42.6650, 0.1100];
     const panoramicZoom = 10;
 
@@ -84,7 +114,7 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Capas
+    // Capa satélite
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19
     }).addTo(map);
@@ -106,21 +136,21 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
       }
     });
 
-    // ─── LÍNEAS DE CARRETERA (desplazamientos en coche) ───
+    // ─── CARRETERAS (desplazamientos en coche) ───
     const driveLayers = {};
     TRIP_DAYS.forEach(day => {
       if (!day.drivePath || day.drivePath.length === 0) return;
       const drive = L.polyline(day.drivePath, {
         color: day.color,
         weight: 3,
-        opacity: 0.6,
+        opacity: 0.55,
         dashArray: '8, 6',
         lineCap: 'round'
       }).addTo(map);
       driveLayers[day.id] = drive;
     });
 
-    // ─── LÍNEAS DE SENDERISMO (resplandecientes) ───
+    // ─── SENDEROS DE MONTAÑA (resplandecientes, pasan por el refugio) ───
     const routeLayers = {};
     const glowLayers = {};
 
@@ -129,7 +159,7 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
 
       const glow = L.polyline(day.routePath, {
         color: day.color,
-        weight: 10,
+        weight: 11,
         opacity: 0.4,
         lineCap: 'round',
         lineJoin: 'round'
@@ -148,54 +178,48 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
       line.on('click', () => selectDay(day.id));
       line.on('mouseover', () => {
         line.setStyle({ weight: 6.5 });
-        glow.setStyle({ opacity: 0.7, weight: 14 });
+        glow.setStyle({ opacity: 0.75, weight: 15 });
       });
       line.on('mouseout', () => {
         if (currentActiveDay !== day.id) {
           line.setStyle({ weight: 4.5 });
-          glow.setStyle({ opacity: 0.4, weight: 10 });
+          glow.setStyle({ opacity: 0.4, weight: 11 });
         }
       });
     });
 
-    // ─── MARCADORES DE LOS 5 REFUGIOS / ZONAS ───
-    MAP_PINS.forEach(pin => {
-      const pinHtml = `
-        <div class="cursor-pointer group select-none transition-transform hover:scale-110 active:scale-95" style="transform: translate(-50%, -50%)">
+    // ─── MARCADORES DE LOS REFUGIOS DE MONTAÑA (Icono 🛖) ───
+    REFUGIO_PINS.forEach(refugio => {
+      const refugioHtml = `
+        <div class="cursor-pointer group select-none transition-transform hover:scale-115 active:scale-95" style="transform: translate(-50%, -50%)">
           <div style="
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 10px; border-radius: 999px;
-            background: rgba(17, 22, 32, 0.92);
-            border: 1.5px solid ${pin.color};
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 8px; border-radius: 999px;
+            background: rgba(5, 46, 22, 0.92);
+            border: 1.5px solid #22c55e;
             backdrop-filter: blur(8px);
-            color: white; font-family: Inter, system-ui, sans-serif;
-            font-size: 11px; font-weight: 700; white-space: nowrap;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+            color: #86efac; font-family: Inter, system-ui, sans-serif;
+            font-size: 11px; font-weight: 800; white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
           ">
-            <span style="
-              width: 17px; height: 17px; border-radius: 50%;
-              display: flex; align-items: center; justify-content: center;
-              font-size: 10px; font-weight: 900;
-              color: #0c1014;
-              background-color: ${pin.color};
-            ">${pin.badge}</span>
-            <span style="color: #f1f5f9">${pin.name}</span>
+            <span style="font-size: 13px;">🛖</span>
+            <span>${refugio.name}</span>
           </div>
         </div>
       `;
 
       const icon = L.divIcon({
         className: '',
-        html: pinHtml,
+        html: refugioHtml,
         iconSize: [0, 0],
         iconAnchor: [0, 0]
       });
 
-      const marker = L.marker(pin.coords, { icon }).addTo(map);
-      marker.on('click', () => selectDay(pin.id));
+      const marker = L.marker(refugio.coords, { icon }).addTo(map);
+      marker.on('click', () => selectDay(refugio.id));
     });
 
-    // ─── POI CARD ───
+    // ─── POI CARD ELEMENTS ───
     const poiCard = document.getElementById('poi-detail-card');
     const els = {
       image: document.getElementById('poi-card-image'),
@@ -203,11 +227,16 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
       title: document.getElementById('poi-card-title'),
       subtitle: document.getElementById('poi-card-subtitle'),
       desc: document.getElementById('poi-card-desc'),
-      refugio: document.getElementById('poi-card-refugio'),
+      refugioName: document.getElementById('poi-card-refugio-name'),
+      refugioAlt: document.getElementById('poi-card-refugio-alt'),
+      refugioServices: document.getElementById('poi-card-refugio-services'),
+      wikilocTitle: document.getElementById('poi-card-wikiloc-title'),
+      wikilocRating: document.getElementById('poi-card-wikiloc-rating'),
+      wikilocLink: document.getElementById('poi-card-wikiloc-link'),
       duration: document.getElementById('poi-card-duration'),
       distance: document.getElementById('poi-card-distance'),
       elevation: document.getElementById('poi-card-elevation'),
-      gmaps: document.getElementById('btn-poi-gmaps'),
+      booking: document.getElementById('btn-poi-booking'),
       center: document.getElementById('btn-poi-center')
     };
 
@@ -224,11 +253,22 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
       els.subtitle.innerText = day.poi.subtitle;
       els.subtitle.style.color = day.color;
       els.desc.innerText = day.poi.description;
-      els.refugio.innerHTML = `<span>🛖</span><span>Alojamiento: ${day.refugio}</span>`;
+
+      // Refugio
+      els.refugioName.innerText = day.refugio.name;
+      els.refugioAlt.innerText = day.refugio.altitude;
+      els.refugioServices.innerText = day.refugio.services;
+      els.booking.href = day.refugio.bookingUrl;
+
+      // Wikiloc
+      els.wikilocTitle.innerText = day.wikiloc.title;
+      els.wikilocRating.innerText = day.wikiloc.rating;
+      els.wikilocLink.href = day.wikiloc.searchUrl;
+
+      // Stats
       els.duration.innerText = `⏱️ ${day.poi.duration}`;
       els.distance.innerText = `📏 ${day.poi.distance}`;
       els.elevation.innerText = `⛰️ ${day.poi.elevation}`;
-      els.gmaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.poi.name + ' Pirineos')}`;
     }
 
     function selectDay(dayId) {
@@ -236,9 +276,9 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
         TRIP_DAYS.forEach(d => {
           if (routeLayers[d.id]) {
             routeLayers[d.id].setStyle({ opacity: 0.95, weight: 4.5 });
-            glowLayers[d.id].setStyle({ opacity: 0.4, weight: 10 });
+            glowLayers[d.id].setStyle({ opacity: 0.4, weight: 11 });
           }
-          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.6 });
+          if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.55 });
         });
         map.flyTo(panoramicCenter, panoramicZoom, { duration: 1.2 });
         return;
@@ -255,7 +295,7 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
         if (!routeLayers[d.id]) return;
         if (d.id === dayId) {
           routeLayers[d.id].setStyle({ opacity: 1, weight: 6.5 });
-          glowLayers[d.id].setStyle({ opacity: 0.8, weight: 14 });
+          glowLayers[d.id].setStyle({ opacity: 0.8, weight: 15 });
           if (driveLayers[d.id]) driveLayers[d.id].setStyle({ opacity: 0.9, weight: 4 });
         } else {
           routeLayers[d.id].setStyle({ opacity: 0.25, weight: 2.5 });
@@ -264,7 +304,7 @@ import { TRIP_DAYS, MAP_PINS } from '../data/tripData';
         }
       });
 
-      // Encuadrar en el sendero del día
+      // Encuadrar en el sendero del día incluyendo el refugio
       if (selected.routePath && selected.routePath.length > 0) {
         const bounds = L.latLngBounds(selected.routePath);
         map.flyToBounds(bounds, { padding: [70, 70], maxZoom: 13, duration: 1.2 });

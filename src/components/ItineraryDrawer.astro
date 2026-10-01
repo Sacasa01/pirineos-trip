@@ -12,7 +12,7 @@ const iconMap: Record<string, string> = {
   id="itinerary-drawer"
   class="w-[370px] sm:w-[410px] max-w-[92vw] h-screen bg-[#11161d] border-r border-white/10 flex flex-col z-30 shrink-0 transition-transform duration-300 ease-in-out shadow-2xl relative"
 >
-  <!-- ═══════════ PANEL 1: RUTA (simplificado con refugios) ═══════════ -->
+  <!-- ═══════════ PANEL 1: RUTA (simplificado con refugios y Wikiloc) ═══════════ -->
   <div id="panel-ruta" class="flex flex-col h-full">
 
     <!-- Header -->
@@ -22,7 +22,7 @@ const iconMap: Record<string, string> = {
           <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-sm">🏔️</span>
           <div>
             <h2 class="text-sm font-bold text-white">Ruta de los Refugios</h2>
-            <p class="text-[11px] text-slate-400">{TRIP_META.dates} · 4 amigos</p>
+            <p class="text-[11px] text-slate-400">{TRIP_META.dates} · Con tracks Wikiloc</p>
           </div>
         </div>
         <button id="btn-close-drawer-ruta" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10" title="Ocultar">
@@ -34,7 +34,7 @@ const iconMap: Record<string, string> = {
     </div>
 
     <!-- Scrollable route cards -->
-    <div class="flex-1 overflow-y-auto p-3.5 space-y-3 custom-scrollbar">
+    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar">
       {TRIP_DAYS.map((day) => (
         <div 
           data-day-id={day.id}
@@ -54,36 +54,53 @@ const iconMap: Record<string, string> = {
             </div>
           </div>
 
-          <!-- Resumen de etapa & Refugio -->
-          <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
-            <div class="flex items-start gap-2">
-              <span class="text-slate-500 shrink-0">🚗</span>
-              <span class="text-slate-400 leading-snug">{day.routeSummary.depart}</span>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-slate-500 shrink-0">🥾</span>
-              <span class="font-semibold text-white leading-snug">{day.routeSummary.startHike}</span>
-            </div>
-            {day.poi.duration !== '-' && (
-              <div class="flex items-center gap-3 text-[10.5px] text-slate-400 pl-5">
-                <span>⏱️ {day.poi.duration}</span>
-                <span>📏 {day.poi.distance}</span>
-                <span class="text-emerald-400 font-semibold">⛰️ {day.poi.elevation}</span>
+          <!-- Refugio destacado donde dormís -->
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-2.5 text-[11.5px]">
+            <div class="flex items-center justify-between font-bold text-emerald-300 mb-0.5">
+              <div class="flex items-center gap-1.5">
+                <span>🛖</span>
+                <span>{day.refugio.name}</span>
               </div>
-            )}
-            <div class="flex items-start gap-2">
-              <span class="text-slate-500 shrink-0">🏁</span>
-              <span class="text-slate-400 leading-snug">{day.routeSummary.endHike}</span>
+              <span class="text-[10.5px] text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded font-mono">{day.refugio.altitude}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 leading-snug">{day.refugio.services}</div>
+          </div>
+
+          <!-- Wikiloc Top Track Card -->
+          <div class="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/25 mb-2.5 text-[11px]">
+            <div class="flex items-center justify-between text-emerald-400 font-bold mb-1">
+              <span class="flex items-center gap-1">🟢 Wikiloc Top Track</span>
+              <span class="text-[10px] text-amber-300">{day.wikiloc.rating.split(' ')[0]}</span>
+            </div>
+            <div class="text-white font-medium mb-1.5 leading-snug">{day.wikiloc.title}</div>
+            <div class="flex items-center justify-between text-[10px] text-slate-300">
+              <span>📏 {day.wikiloc.distance} · ⛰️ {day.wikiloc.elevation}</span>
+              <a 
+                href={day.wikiloc.searchUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="text-emerald-300 hover:text-white font-bold underline transition-colors"
+                onclick="event.stopPropagation()"
+              >
+                Abrir en Wikiloc ↗️
+              </a>
             </div>
           </div>
 
-          <!-- Refugio destacado donde dormís -->
-          <div class="mt-3 ml-9 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-[11px] text-emerald-300">
-            <div class="flex items-center gap-1.5 font-semibold">
-              <span>🛖</span>
-              <span>{day.refugio}</span>
+          <!-- Resumen de tiempos -->
+          <div class="space-y-1 text-[11px] text-slate-300">
+            <div class="flex items-start gap-1.5">
+              <span class="text-slate-500 shrink-0">🚗</span>
+              <span class="text-slate-400 leading-snug">{day.routeSummary.depart}</span>
             </div>
-            <span class="text-[10px] text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded font-mono">Día {day.dayNumber}</span>
+            <div class="flex items-start gap-1.5">
+              <span class="text-slate-500 shrink-0">🥾</span>
+              <span class="font-semibold text-white leading-snug">{day.routeSummary.startHike}</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <span class="text-slate-500 shrink-0">🏁</span>
+              <span class="text-slate-400 leading-snug">{day.routeSummary.endHike}</span>
+            </div>
           </div>
         </div>
       ))}
@@ -127,17 +144,27 @@ const iconMap: Record<string, string> = {
       {TRIP_DAYS.map((day) => (
         <div data-day-id={day.id} class="itinerary-day-block">
           <!-- Day divider -->
-          <div class="flex items-center gap-2 mb-2.5 sticky top-0 z-10 bg-[#11161d] py-1 border-b border-white/5">
-            <span 
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0 shadow-sm"
-              style={`background-color: ${day.color}`}
-            >
-              {day.dayNumber}
-            </span>
-            <div>
-              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{day.dateTitle}</div>
-              <div class="text-xs font-bold text-white">{day.routeTitle}</div>
+          <div class="flex items-center justify-between gap-2 mb-2.5 sticky top-0 z-10 bg-[#11161d] py-1 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span 
+                class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0 shadow-sm"
+                style={`background-color: ${day.color}`}
+              >
+                {day.dayNumber}
+              </span>
+              <div>
+                <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{day.dateTitle}</div>
+                <div class="text-xs font-bold text-white">{day.routeTitle}</div>
+              </div>
             </div>
+            <a 
+              href={day.wikiloc.searchUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[10px] font-bold text-emerald-400 hover:text-white px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20"
+            >
+              Wikiloc ↗️
+            </a>
           </div>
 
           <!-- Full timeline -->
