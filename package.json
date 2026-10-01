@@ -16,11 +16,5 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.16"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ]
   }
 }

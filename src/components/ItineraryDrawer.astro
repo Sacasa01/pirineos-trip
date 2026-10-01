@@ -1,19 +1,18 @@
 ---
 // src/components/ItineraryDrawer.astro
-// Panel de la izquierda con dos modos: "Ruta" (simplificado) e "Itinerario" (detallado)
 import { TRIP_DAYS, TRIP_META } from '../data/tripData';
 
 const iconMap: Record<string, string> = {
   car: '🚗', bus: '🚌', hike: '🥾', picnic: '🥪',
-  camp: '⛺', food: '🍽️', info: 'ℹ️'
+  camp: '🛖', food: '🍽️', info: 'ℹ️'
 };
 ---
 
 <div 
   id="itinerary-drawer"
-  class="w-[370px] sm:w-[400px] max-w-[92vw] h-screen bg-[#11161d] border-r border-white/10 flex flex-col z-30 shrink-0 transition-transform duration-300 ease-in-out shadow-2xl relative"
+  class="w-[370px] sm:w-[410px] max-w-[92vw] h-screen bg-[#11161d] border-r border-white/10 flex flex-col z-30 shrink-0 transition-transform duration-300 ease-in-out shadow-2xl relative"
 >
-  <!-- ═══════════ PANEL 1: RUTA (simplificado) ═══════════ -->
+  <!-- ═══════════ PANEL 1: RUTA (simplificado con refugios) ═══════════ -->
   <div id="panel-ruta" class="flex flex-col h-full">
 
     <!-- Header -->
@@ -22,7 +21,7 @@ const iconMap: Record<string, string> = {
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-sm">🏔️</span>
           <div>
-            <h2 class="text-sm font-bold text-white">Ruta del Viaje</h2>
+            <h2 class="text-sm font-bold text-white">Ruta de los Refugios</h2>
             <p class="text-[11px] text-slate-400">{TRIP_META.dates} · 4 amigos</p>
           </div>
         </div>
@@ -34,7 +33,7 @@ const iconMap: Record<string, string> = {
       </div>
     </div>
 
-    <!-- Scrollable route cards (simplified) -->
+    <!-- Scrollable route cards -->
     <div class="flex-1 overflow-y-auto p-3.5 space-y-3 custom-scrollbar">
       {TRIP_DAYS.map((day) => (
         <div 
@@ -55,42 +54,36 @@ const iconMap: Record<string, string> = {
             </div>
           </div>
 
-          {/* Si hay ruta de senderismo, mostrar resumen */}
-          {day.routeSummary.startHike ? (
-            <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
-              <div class="flex items-center gap-2">
-                <span class="text-slate-500">🚗</span>
-                <span>{day.routeSummary.depart}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-slate-500">🥾</span>
-                <span class="font-semibold text-white">{day.routeSummary.startHike}</span>
-              </div>
-              {day.poi.duration !== '-' && (
-                <div class="flex items-center gap-3 text-[10.5px] text-slate-400 pl-6">
-                  <span>⏱️ {day.poi.duration}</span>
-                  <span>📏 {day.poi.distance}</span>
-                  <span class="text-emerald-400">⛰️ {day.poi.elevation}</span>
-                </div>
-              )}
-              <div class="flex items-center gap-2">
-                <span class="text-slate-500">🏁</span>
-                <span>{day.routeSummary.endHike}</span>
-              </div>
+          <!-- Resumen de etapa & Refugio -->
+          <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
+            <div class="flex items-start gap-2">
+              <span class="text-slate-500 shrink-0">🚗</span>
+              <span class="text-slate-400 leading-snug">{day.routeSummary.depart}</span>
             </div>
-          ) : (
-            <div class="space-y-1.5 text-[11.5px] text-slate-300 ml-9">
-              <div class="flex items-center gap-2">
-                <span class="text-slate-500">🚗</span>
-                <span>{day.routeSummary.depart}</span>
-              </div>
+            <div class="flex items-start gap-2">
+              <span class="text-slate-500 shrink-0">🥾</span>
+              <span class="font-semibold text-white leading-snug">{day.routeSummary.startHike}</span>
             </div>
-          )}
+            {day.poi.duration !== '-' && (
+              <div class="flex items-center gap-3 text-[10.5px] text-slate-400 pl-5">
+                <span>⏱️ {day.poi.duration}</span>
+                <span>📏 {day.poi.distance}</span>
+                <span class="text-emerald-400 font-semibold">⛰️ {day.poi.elevation}</span>
+              </div>
+            )}
+            <div class="flex items-start gap-2">
+              <span class="text-slate-500 shrink-0">🏁</span>
+              <span class="text-slate-400 leading-snug">{day.routeSummary.endHike}</span>
+            </div>
+          </div>
 
-          {/* Dónde dormimos */}
-          <div class="mt-2.5 ml-9 flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
-            <span>⛺</span>
-            <span>{day.routeSummary.sleep}</span>
+          <!-- Refugio destacado donde dormís -->
+          <div class="mt-3 ml-9 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-[11px] text-emerald-300">
+            <div class="flex items-center gap-1.5 font-semibold">
+              <span>🛖</span>
+              <span>{day.refugio}</span>
+            </div>
+            <span class="text-[10px] text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded font-mono">Día {day.dayNumber}</span>
           </div>
         </div>
       ))}
@@ -101,9 +94,9 @@ const iconMap: Record<string, string> = {
       <button id="btn-budget-ruta" class="w-full py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 flex items-center justify-between text-xs transition-all">
         <div class="flex items-center gap-2">
           <span>💰</span>
-          <span class="text-[11px] font-bold text-white">Presupuesto</span>
+          <span class="text-[11px] font-bold text-white">Presupuesto Estimado</span>
         </div>
-        <span class="text-xs font-black text-emerald-400">~58,75 € / pers</span>
+        <span class="text-xs font-black text-emerald-400">~65 € / pers (gasolina)</span>
       </button>
     </div>
   </div>
@@ -117,8 +110,8 @@ const iconMap: Record<string, string> = {
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-sm">📋</span>
           <div>
-            <h2 class="text-sm font-bold text-white">Itinerario Detallado</h2>
-            <p class="text-[11px] text-slate-400">Cronograma completo hora a hora</p>
+            <h2 class="text-sm font-bold text-white">Itinerario Completo</h2>
+            <p class="text-[11px] text-slate-400">Cronograma detallado hora a hora</p>
           </div>
         </div>
         <button id="btn-close-drawer-itinerario" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-white/10" title="Ocultar">
@@ -134,9 +127,9 @@ const iconMap: Record<string, string> = {
       {TRIP_DAYS.map((day) => (
         <div data-day-id={day.id} class="itinerary-day-block">
           <!-- Day divider -->
-          <div class="flex items-center gap-2 mb-2.5 sticky top-0 z-10 bg-[#11161d] py-1">
+          <div class="flex items-center gap-2 mb-2.5 sticky top-0 z-10 bg-[#11161d] py-1 border-b border-white/5">
             <span 
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0"
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-obsidian shrink-0 shadow-sm"
               style={`background-color: ${day.color}`}
             >
               {day.dayNumber}
@@ -185,7 +178,6 @@ const iconMap: Record<string, string> = {
         panelRuta.classList.add('hidden');
         panelItinerario.classList.remove('hidden');
       }
-      // Siempre abrir el drawer
       drawer.classList.remove('-translate-x-full');
       window.dispatchEvent(new CustomEvent('drawer-toggle', { detail: { isOpen: true } }));
     }
@@ -195,16 +187,13 @@ const iconMap: Record<string, string> = {
       window.dispatchEvent(new CustomEvent('drawer-toggle', { detail: { isOpen: false } }));
     }
 
-    // Escuchar switch-panel desde la sidebar
     window.addEventListener('switch-panel', (e) => {
       showPanel(e.detail.panel);
     });
 
-    // Cerrar drawer
     closeRuta?.addEventListener('click', closeDrawer);
     closeItinerario?.addEventListener('click', closeDrawer);
 
-    // Clicking a route card selects that day on the map
     document.querySelectorAll('.route-card').forEach(card => {
       card.addEventListener('click', () => {
         const dayId = card.getAttribute('data-day-id');
@@ -212,7 +201,6 @@ const iconMap: Record<string, string> = {
       });
     });
 
-    // Budget button
     document.getElementById('btn-budget-ruta')?.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('open-budget-modal'));
     });
